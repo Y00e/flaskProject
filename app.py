@@ -76,15 +76,7 @@ def verifyToken(headers):
         return False
 
 
-SECRET_KEY = "super_hemliga_nyckel"
-
-def create_jwt(user_id):
-    payload = {
-        "user_id": user_id,
-    }
-
-    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")
-    return token
+SECRET_KEY = "super_secret_key"
 
 
 @app.route('/login', methods=['POST'])
@@ -93,10 +85,9 @@ def login():
     username = data.get('username')
     password = data.get('password')
 
+    token = jwt.encode({'username': username, 'password': password}, SECRET_KEY, algorithm="HS256")
+    return token
 
-    token = create_jwt(username)
-
-    return {'token': token}
 
 if __name__ == '__main__':
     app.run()
