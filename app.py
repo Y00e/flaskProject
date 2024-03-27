@@ -13,16 +13,19 @@ def hello_world():  # put application's code here
 
 @app.route('/weather/predict', methods=['GET'])
 def predict_weather():
-  inparray = [request.json["precipitation"],request.json["temp_max"],request.json["temp_min"],request.json["wind"]]
-  filename = 'finalized_model.sav'
-  loaded_model = joblib.load(filename)
-  result = loaded_model.predict([inparray])
-  print(result)
-  if(result == 1):
-    weather = "rain"
-  else:
-    weather = "sunny"
-  return {"weather":weather}
+    if verifyToken(request.headers) == False:
+        return "Invalid token", 403
+
+    inparray = [request.json["precipitation"],request.json["temp_max"],request.json["temp_min"],request.json["wind"]]
+    filename = 'finalized_model.sav'
+    loaded_model = joblib.load(filename)
+    result = loaded_model.predict([inparray])
+    print(result)
+    if(result == 1):
+        weather = "rain"
+    else:
+        weather = "sunny"
+    return {"weather":weather}
 
 @app.route('/weather/accuracy', methods=['GET'])
 def weather_accuracy():
@@ -86,7 +89,8 @@ def login():
     password = data.get('password')
 
     token = jwt.encode({'username': username, 'password': password}, SECRET_KEY, algorithm="HS256")
-    return token
+
+    return {"token": token}
 
 
 if __name__ == '__main__':
