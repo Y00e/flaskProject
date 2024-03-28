@@ -15,26 +15,25 @@ def hello_world():  # put application's code here
 def predict_weather():
     if verifyToken(request.headers) == False:
         return "Invalid token", 403
-
-    inparray = [request.json["precipitation"],request.json["temp_max"],request.json["temp_min"],request.json["wind"]]
+    inparray = [request.json["precipitation"], request.json["temp_max"], request.json["temp_min"], request.json["wind"]]
     filename = 'finalized_model.sav'
     loaded_model = joblib.load(filename)
-    result = loaded_model.predict([inparray])
+    result = loaded_model.predict([inparray]).tolist()[0]
+    weather_accuracy = loaded_model.predict_proba([inparray])[0]
+    print(weather_accuracy)
+
     print(result)
-    if(result == 1):
+    if (result == 1):
         weather = "rain"
     else:
         weather = "sunny"
-    return {"weather":weather}
-
-@app.route('/weather/accuracy', methods=['GET'])
-def weather_accuracy():
-  return {"accuracy":.8464163822525598}
+    return {"weather": weather, "accuracy": weather_accuracy[result]}
 
 @app.route('/music/predict', methods=['GET'])
 def predict_music():
     if verifyToken(request.headers) == False:
         return "Invalid token", 403
+
     inparray = [request.json["danceability"],
                 request.json["key"],
                 request.json["loudness"],
@@ -48,24 +47,20 @@ def predict_music():
                 request.json["duration_ms"]]
     filename = 'finalized_music.pbz2'
     loaded_model = joblib.load(filename)
-    result = loaded_model.predict([inparray])
+    result = loaded_model.predict([inparray]).tolist()[0]
+    music_accuracy = loaded_model.predict_proba([inparray])[0]
+    print(music_accuracy)
     print(result)
     replace_dict = {
-      0:'pop',
-      1:'rap',
-      2:'rock',
-      3:'latin',
-      4:'r&b',
-      5:'edm'
+        0: 'pop',
+        1: 'rap',
+        2: 'rock',
+        3: 'latin',
+        4: 'r&b',
+        5: 'edm'
     }
-    music = replace_dict[0]
-    return {"music genre":music}
-
-@app.route('/music/accuracy', methods=['GET'])
-def music_accuracy():
-  return {"accuracy":.5509365006852444}
-
-
+    music = replace_dict[result]
+    return {"music genre": music, "accuracy": music_accuracy[result]}
 
 
 
